@@ -46,7 +46,8 @@ class FBLogin extends Component {
     this.state = {
       statics:statics,
       isLoggedIn: false,
-      buttonText: statics.loginText
+      buttonText: statics.loginText,
+      name: ""
     };
   }
 
@@ -58,7 +59,8 @@ class FBLogin extends Component {
     isLoggedIn: PropTypes.bool,
     login: PropTypes.func,
     logout: PropTypes.func,
-    props: PropTypes.object
+    props: PropTypes.object,
+    name: PropTypes.string
   }
 
   getChildContext () {
@@ -66,13 +68,14 @@ class FBLogin extends Component {
       isLoggedIn: this.state.isLoggedIn,
       login: this.login,
       logout: this.logout,
-      props: this.props
+      props: this.props,
+      name: this.state.name
     };
 
   }
 
-  changeLoginStatus(isLoggedIn){
-    this.setState({isLoggedIn: isLoggedIn})
+  changeLoginStatus(isLoggedIn, displayName){
+    this.setState({isLoggedIn: isLoggedIn, name: displayName})
   }
 
   login(permissions) {
