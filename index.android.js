@@ -51,21 +51,7 @@ class FBLogin extends Component {
   }
 
   componentDidMount(){
-    FBLoginManager.setLoginBehavior(this.props.loginBehavior)
-      .then((behaviour)=>{
-        console.log(`FbLogin: using ${behaviour.name} behaviour`, behaviour)
-      });
-    FBLoginManager.getCredentials((err, data) => {
-      if(data &&
-        itypeof(data.credentials) === 'object' &&
-        itypeof(data.credentials.token) === 'string' &&
-        data.credentials.token.length > 0) {
-        this.setState({isLoggedIn:true, buttonText: this.state.statics.logoutText});
-      } else {
-        this.setState({isLoggedIn:false, buttonText: this.state.statics.loginText});
-      }
-      this._handleEvent(null,data);
-    })
+    FBLoginManager.setLoginBehavior(this.props.loginBehavior);
   }
 
   static childContextTypes = {
@@ -83,6 +69,10 @@ class FBLogin extends Component {
       props: this.props
     };
 
+  }
+
+  changeLoginStatus(isLoggedIn){
+    this.setState({isLoggedIn: isLoggedIn})
   }
 
   login(permissions) {
@@ -107,17 +97,11 @@ class FBLogin extends Component {
       }
     }
 
-    if(result.eventName === 'onLogin' || result.eventName === 'onLoginFound'){
-      this.setState({isLoggedIn:true, buttonText: this.state.statics.logoutText});
-    } else if (result.eventName === 'onLogout'){
-      this.setState({isLoggedIn:false, buttonText: this.state.statics.loginText});
-    }
-
     if(result.eventName && this.props.hasOwnProperty(result.eventName)){
       const event = result.eventName;
       delete result.eventName;
       console.log('Triggering \'%s\' event', event)
-      this.props[event](result);
+      this.props[event](result, this.changeLoginStatus.bind(this));
     } else {
       console.log('\'%s\' Event is not defined or recognized', result.eventName)
     }
