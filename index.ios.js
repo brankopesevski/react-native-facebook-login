@@ -43,6 +43,7 @@ class FBLogin extends Component {
 
     this.state = {
       isLoggedIn: false,
+      name: "",
       subscriptions : [],
     }
   }
@@ -50,7 +51,8 @@ class FBLogin extends Component {
     isLoggedIn: PropTypes.bool,
     login: PropTypes.func,
     logout: PropTypes.func,
-    props: PropTypes.object
+    props: PropTypes.object,
+    name: PropTypes.string
   }
 
   getChildContext () {
@@ -58,7 +60,8 @@ class FBLogin extends Component {
       isLoggedIn: this.state.isLoggedIn,
       login: this.login,
       logout: this.logout,
-      props: this.props
+      props: this.props,
+      name: this.state.name
     };
 
   }
@@ -86,6 +89,8 @@ class FBLogin extends Component {
     var _this = this
     const subscriptions = this.state.subscriptions;
 
+
+
     // For each event key in FBLoginManager constantsToExport
     // Create listener and call event handler from props
     // e.g.  this.props.onError, this.props.onLogin
@@ -108,8 +113,8 @@ class FBLogin extends Component {
     subscriptions.forEach(subscription => subscription.remove());
   }
 
-  changeLoginStatus(isLoggedIn){
-    this.setState({isLoggedIn: isLoggedIn})
+  changeLoginStatus(isLoggedIn, name){
+    this.setState({isLoggedIn: isLoggedIn, name: name})
   }
 
   componentDidMount(){
@@ -121,7 +126,7 @@ class FBLogin extends Component {
       permissions = this.props.permissions;
     }
 
-    if(this.state.isLoggedIn){
+    if(true){
       this.logout()
     }else{
       this.login(permissions)
