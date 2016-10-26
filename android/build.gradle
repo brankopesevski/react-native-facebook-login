@@ -32,8 +32,5 @@ repositories {
 dependencies {
     compile 'com.facebook.react:react-native:+'
     compile ('com.facebook.android:facebook-android-sdk:4.16.+'){
-        exclude group: 'com.parse.bolts', module: 'bolts-android';
-        exclude group: 'com.parse.bolts', module: 'bolts-applinks';
-        exclude group: 'com.parse.bolts', module: 'bolts-tasks';
     }
 }
