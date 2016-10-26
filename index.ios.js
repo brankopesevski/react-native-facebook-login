@@ -9,7 +9,8 @@ import {
   NativeModules,
   NativeMethodsMixin,
   DeviceEventEmitter,
-  requireNativeComponent
+  requireNativeComponent,
+  TouchableHighlight
 } from 'react-native';
 
 const FBLoginManager = NativeModules.MFBLoginManager;
@@ -34,10 +35,32 @@ class FBLogin extends Component {
       Events : FBLoginManager.Events,
     };
 
+    this.login = this.login.bind(this);
+    this.logout = this.logout.bind(this);
+    this._getButtonView = this._getButtonView.bind(this);
+    this.getChildContext = this.getChildContext.bind(this);
+    this._onFacebookPress = this._onFacebookPress.bind(this);
+
     this.state = {
-      credentials   : null,
+      isLoggedIn: false,
       subscriptions : [],
     }
+  }
+  static childContextTypes = {
+    isLoggedIn: PropTypes.bool,
+    login: PropTypes.func,
+    logout: PropTypes.func,
+    props: PropTypes.object
+  }
+
+  getChildContext () {
+    return {
+      isLoggedIn: this.state.isLoggedIn,
+      login: this.login,
+      logout: this.logout,
+      props: this.props
+    };
+
   }
 
   bindAll() {
@@ -48,7 +71,19 @@ class FBLogin extends Component {
     }
   }
 
+  login(permissions) {
+    FBLoginManager.loginWithPermissions(
+      permissions || this.props.permissions,
+      (err,data) => {}
+    );
+  }
+
+  logout() {
+    FBLoginManager.logout((err, data) => {});
+  }
+
   componentWillMount(){
+    var _this = this
     const subscriptions = this.state.subscriptions;
 
     // For each event key in FBLoginManager constantsToExport
@@ -60,7 +95,7 @@ class FBLogin extends Component {
         (eventData) => {
           // event handler defined? call it and pass along any event data
           let eventHandler = this.props["on"+event];
-          eventHandler && eventHandler(eventData);
+          eventHandler && eventHandler(eventData, _this.changeLoginStatus.bind(_this));
         }
       ));
     });
@@ -73,18 +108,45 @@ class FBLogin extends Component {
     subscriptions.forEach(subscription => subscription.remove());
   }
 
-  componentDidMount(){
-    FBLoginManager.getCredentials((error, data) => {
-      if (!error) {
-        this.setState({ credentials : data.credentials });
-      } else {
-        this.setState({ credentials : null });
-      }
-    });
+  changeLoginStatus(isLoggedIn){
+    this.setState({isLoggedIn: isLoggedIn})
   }
 
-  render() {
-    return <RCTMFBLogin {...this.props} style={[styles.base, this.props.style]} />
+  componentDidMount(){
+  }
+
+  _onFacebookPress() {
+    let permissions = [];
+    if( itypeof(this.props.permissions) === 'array'){
+      permissions = this.props.permissions;
+    }
+
+    if(this.state.isLoggedIn){
+      this.logout()
+    }else{
+      this.login(permissions)
+    }
+  }
+
+  _getButtonView () {
+    const buttonText = this.props.facebookText ? this.props.facebookText:this.state.buttonText;
+    return (this.props.buttonView)
+      ? this.props.buttonView
+      : (
+        <View style={[styles.login, this.props.style]}>
+          <Text style={[styles.whiteFont, this.fontStyle]}> {buttonText} </Text>
+        </View>
+      );
+  }
+
+  render(){
+    return (
+      <TouchableHighlight onPress={this._onFacebookPress} >
+        <View style={[this.props.containerStyle]}>
+          {this._getButtonView()}
+        </View>
+      </TouchableHighlight>
+    )
   }
 }
 
